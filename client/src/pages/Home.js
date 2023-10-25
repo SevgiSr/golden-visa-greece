@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Navbar } from "../components";
 import StyledHome from "./styles/Home.styled";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register ScrollTrigger with GSAP
+gsap.registerPlugin(ScrollTrigger);
+
 function Home() {
   const [xValue, setXValue] = useState(0);
   const [yValue, setYValue] = useState(0);
   const [clientX, setClientX] = useState(0);
   const [rotateDegree, setRotateDegree] = useState(0);
+  const [isStickyActivated, setIsStickyActivated] = useState(false);
 
+  // parallax code
   const parallaxRef = useRef({});
 
   const handleMouseMove = (e) => {
@@ -22,7 +30,7 @@ function Home() {
   useEffect(() => {
     Object.keys(parallaxRef.current).forEach((key) => {
       const currentElement = parallaxRef.current[key];
-      if (currentElement) {
+      if (currentElement && currentElement.classList.contains("parallax")) {
         const isInLeft =
           parseFloat(getComputedStyle(currentElement).left) <
           window.innerWidth / 2
@@ -58,6 +66,28 @@ function Home() {
     };
   }, []);
 
+  //////////
+
+  useEffect(() => {
+    ScrollTrigger.create({
+      trigger: ".god",
+      start: "top top",
+      end: "+=1000px",
+      pin: true,
+      pinSpacing: false,
+      onEnter: () => {
+        setIsStickyActivated(true); // Set to sticky
+      },
+      onLeaveBack: () => {
+        setIsStickyActivated(false); // Set to not sticky
+      },
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+    };
+  }, []);
+
   return (
     <StyledHome>
       <Navbar />
@@ -90,19 +120,21 @@ function Home() {
         </header>
       </main>
 
-      <div style={{ textAlign: "end", position: "relative" }}>
-        <img
-          className="god parallax"
-          data-speedx="0.05"
-          data-speedy="0.02"
-          data-speedz="0.5"
-          data-rotation="0.1"
-          data-distance="1200"
-          ref={(el) => (parallaxRef.current["god"] = el)}
-          src={"/greek-god.png"}
-          alt="Greek God"
-        />
-      </div>
+      <img
+        className={"god " + (isStickyActivated ? "sticky" : "parallax")}
+        data-speedx="0.05"
+        data-speedy="0.02"
+        data-speedz="0.5"
+        data-rotation="0.1"
+        data-distance="1200"
+        ref={(el) => (parallaxRef.current["god"] = el)}
+        src={"/greek-god.png"}
+        alt="Greek God"
+      />
+
+      <section></section>
+
+      <section></section>
     </StyledHome>
   );
 }
